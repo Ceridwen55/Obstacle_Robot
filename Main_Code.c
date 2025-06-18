@@ -54,8 +54,9 @@ Create a simple robot that can handle obstacle and keep moving forward. Using PW
 	- 2 10k Ohm resistors ( pull down so it will stabilize motor while MCU turns on )
 	
 3. Robot Body and Attachment
-	- 2 wheels attached to the DC Motors ( choose with the good friction and low load for the motor to spin)
-	- 
+	- 2 wheels attached to the DC Motors 78MM Dual Shaft( choose with the good friction and low load for the motor to spin)
+	- 2 WD Casis kit
+	- To be continued
 
 */
 
@@ -63,6 +64,11 @@ Create a simple robot that can handle obstacle and keep moving forward. Using PW
 
 
 #include <stdint.h>
+
+
+
+//*** ADDRESS ***//
+
 
 
 
