@@ -28,7 +28,7 @@ Create a simple robot that can handle obstacle and keep moving forward. Using PW
 5. After distance value is returned by the ADC function, make Robot_Logic function
  - Based on the previous point (3), based on the error, if error is 0 then there is no need to turn right/left ( keep going straight )
  - Lets say if error is 10 , because left is bigger than right (+) ( probably because right sensor is closer to the wall/obstacle of course) the Right DC motor PWM will be decreased and left Dc motor PWM will be increased 
- - IF error is 0, turn back the DC motor into standard PWM so it will move straight
+ - If error is 0, turn back the DC motor into standard PWM so it will move straight
  - Lets say if error is -10 , right is bigger than left (-), the left DC motor PWM will be decreased and Right DC motor PWM will be increased
  - The problem is if the track is relatively safe to move straight but there are 2 walls with different distance from the sensor, we need to find the limitation for the robot logic to work smoothly without bug
 
@@ -69,10 +69,68 @@ Create a simple robot that can handle obstacle and keep moving forward. Using PW
 
 //*** ADDRESS ***//
 
+//CLOCK
+#define SYSCTL_RCGCGPIO_R       (*((volatile uint32_t *)0x400FE608)) //RCGCGPIO Address offset 0x608
+#define SYSCTL_RCGCADC_R       (*((volatile uint32_t *)0x400FE638)) //RCGCADC Address offset 0x638
+#define SYSCTL_PRGPIO_R        (*((volatile uint32_t *)0x400FEA08)) //Peripheral Ready GPIO Address offset 0xA08
+#define SYSCTL_PRADC_R         (*((volatile uint32_t *)0x400FEA38)) //Peripheral Ready ADC Address offset 0xA38
+
+//GPIO A
+
+#define GPIO_PORTA_BASE					(*((volatile uint32_t *)0x40004000)) //Base address for Port A
+#define GPIO_PORTA_DATA_R       (*((volatile uint32_t *)0x400043FC)) //Offset 0x3fc
+#define GPIO_PORTA_DIR_R        (*((volatile uint32_t *)0x40004400)) //Offset 0x400
+#define GPIO_PORTA_PUR_R        (*((volatile uint32_t *)0x40004510)) //Offset 0x510
+#define GPIO_PORTA_DEN_R        (*((volatile uint32_t *)0x4000451C)) //Offset 0x51c
+#define GPIO_PORTA_DR8R					(*((volatile uint32_t *)0x40004508)) //Offset 0x508
+
+//NVIC
+#define NVIC_STCTRL_R						(*((volatile uint32_t *)0xE000E010)) //Offset 0x010
+#define NVIC_STRELOAD_R					(*((volatile uint32_t *)0xE000E014)) //Offset 0x014
+#define NVIC_STCURRENT_R				(*((volatile uint32_t *)0xE000E018)) //Offset 0x018
+#define NVIC_SYS_PRI3_R  				(*((volatile uint32_t *)0xE000E40C)) //PRI3 because SysTick interrupt ( OFFSET 0X40C)
+	
+	
+//GPIO E
+#define GPIO_PORTE_BASE				 (*((volatile uint32_t *)0x40024000)) //Base address for Port E from page 104 Datasheet TM4C1294XL
+#define GPIO_PORTE_DATA_R			 (*((volatile uint32_t *)0x400243FC)) //Offset 0x3fc
+#define GPIO_PORTE_DIR_R			 (*((volatile uint32_t *)0x40024400)) //Offset 0x400
+#define GPIO_PORTE_DEN_R			 (*((volatile uint32_t *)0x4002451C)) //Offset 0x51C
+#define GPIO_PORTE_AMSEL_R		 (*((volatile uint32_t *)0x40024528)) //Offset 0x528
+#define GPIO_PORTE_AFSEL_R		 (*((volatile uint32_t *)0x40024420)) //Offset 0x420
+
+//ADC0
+#define ADC0_BASE				 	     (*((volatile uint32_t *)0x40038000)) //Base address for ADC0 from page 1077 Datasheet TM4C1294XL
+#define ADC0_ACTSS				 	   (*((volatile uint32_t *)0x40038000)) //Offset 0x000
+#define ADC0_EMUX				 	     (*((volatile uint32_t *)0x40038014)) //Offset 0x014
+#define ADC0_SSPRI				 	   (*((volatile uint32_t *)0x40038020)) //Offset 0x020
+#define ADC0_SSMUX3				 	   (*((volatile uint32_t *)0x400380A0)) //Offset 0x0A0
+#define ADC0_SSCTL3				 	   (*((volatile uint32_t *)0x400380A4)) //Offset 0x0A4
+#define ADC0_IM				 	       (*((volatile uint32_t *)0x40038008)) //Offset 0x008
+#define ADC0_PC				 	       (*((volatile uint32_t *)0x40038FC4)) //Offset 0xFC4
+#define ADC0_PSSI			 	   		 (*((volatile uint32_t *)0x40038028)) //Offset 0x028
+#define ADC0_RIS				 	   	 (*((volatile uint32_t *)0x40038004)) //Offset 0x004
+#define ADC0_SSFIFO3				 	 (*((volatile uint32_t *)0x400380A8)) //Offset 0x0A8
+#define ADC0_ISC				 	   (*((volatile uint32_t *)0x4003800C)) //Offset 0x00C
 
 
 
 
+
+
+
+
+
+//**FUNCTIONS**//
+// Enable global interrupts
+void EnableInterrupts(void) {
+    __asm("CPSIE I");  // CPSIE I = Clear Interrupt Disable bit, enabling interrupts
+}
+
+// Wait for interrupt 
+void WaitForInterrupts(void) {
+    __asm("WFI");  // WFI = Wait For Interrupt instruction
+}
 
 
 
