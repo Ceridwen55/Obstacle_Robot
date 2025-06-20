@@ -104,13 +104,13 @@ Create a simple robot that can handle obstacle and keep moving forward. Using PW
 #define ADC0_ACTSS				 	   (*((volatile uint32_t *)0x40038000)) //Offset 0x000
 #define ADC0_EMUX				 	     (*((volatile uint32_t *)0x40038014)) //Offset 0x014
 #define ADC0_SSPRI				 	   (*((volatile uint32_t *)0x40038020)) //Offset 0x020
-#define ADC0_SSMUX3				 	   (*((volatile uint32_t *)0x400380A0)) //Offset 0x0A0
-#define ADC0_SSCTL3				 	   (*((volatile uint32_t *)0x400380A4)) //Offset 0x0A4
+#define ADC0_SSMUX2				 	   (*((volatile uint32_t *)0x40038080)) //Offset 0x080
+#define ADC0_SSCTL2				 	   (*((volatile uint32_t *)0x40038084)) //Offset 0x084
 #define ADC0_IM				 	       (*((volatile uint32_t *)0x40038008)) //Offset 0x008
 #define ADC0_PC				 	       (*((volatile uint32_t *)0x40038FC4)) //Offset 0xFC4
 #define ADC0_PSSI			 	   		 (*((volatile uint32_t *)0x40038028)) //Offset 0x028
 #define ADC0_RIS				 	   	 (*((volatile uint32_t *)0x40038004)) //Offset 0x004
-#define ADC0_SSFIFO3				 	 (*((volatile uint32_t *)0x400380A8)) //Offset 0x0A8
+#define ADC0_SSFIFO2				 	 (*((volatile uint32_t *)0x40038088)) //Offset 0x088
 #define ADC0_ISC				 	     (*((volatile uint32_t *)0x4003800C)) //Offset 0x00C
 
 
@@ -141,10 +141,10 @@ void GPIOA_Init (void)
 	GPIO_PORTA_DR8R |= 0x30; //0011 0000, PA4 and PA5 has 8mA drive ( for dc motor amps)
 }
 
-void GPIOK_Init (void)
+void GPIOE_Init (void)
 {
 	SYSCTL_RCGCGPIO_R |= 0x10; //0001 000"1", turn on port E clock yet not disturbing previous setup on Port A
-	GPIO_PORTA_DEN_R &= ~0xFF; //0000 0000, make everything 0
+	GPIO_PORTE_DEN_R &= ~0xFF; //0000 0000, make everything 0
 	GPIO_PORTE_DIR_R &= ~0x0C; //1111 0011, make PE3 and PE2 input
 	GPIO_PORTE_AFSEL_R |= 0x0C; // 0000 1100, PE3 and PE2 alternative funct on
 	GPIO_PORTE_AMSEL_R |= 0x0C; //0000 1100, PE3 and PE2 analog funct on
@@ -156,5 +156,15 @@ void GPIOK_Init (void)
 void ADC0_Init_SoftwareTrigger (void)
 {
 	SYSCTL_RCGCADC_R |= 0x01; //0000 0001, turn on ADC0
+	while((SYSCTL_PRGPIO_R & 0x0C) != 0x0c); // loop for stabilization, if false then proceed, if true then loop is still looping
+	ADC0_PC &= ~0xF; //reset all bits to 0 for ADCPC reg
+	ADC0_PC |= 0x01; //set to 128 Khz, why? cause delay 112 Tadc, with average 13 Tadc for conversion to happen, so if ADC clock 16 Mhz / 125 = 128 kHz
+	ADC0_SSPRI |= 0x1023; // 1 for SS3, 0 for SS2, 2 for SS1, 3 for SS0. Smaller the number, higher the priority so SS2 is the highest
+	ADC0_ACTSS &= ~0x04; //Disable Sample Sequencer 2 ( SS2)
+	ADC0_EMUX &= ~0x0F00; //Software Trigger for seq 2
+	ADC0_SSMUX2 = 0x01; //1 for AIN1 because PE2 at bit 0-3 at step 0, 0 for AIN0 because PE3 at bit 4-7 at step 1
+	ADC0_SSCTL2 = 0x66; // IE0 and END0 for step 0 and IE1 and END1 for step 1
+	ADC0_IM &= ~0x04; // disable interrupt mask for SS2
+	ADC0_ACTSS |= 0x04; //enable sample sequencer 2 again
 	
 }
