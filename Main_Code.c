@@ -118,9 +118,6 @@ Create a simple robot that can handle obstacle and keep moving forward. Using PW
 
 
 
-
-
-
 //**FUNCTIONS**//
 // Enable global interrupts
 void EnableInterrupts(void) {
@@ -149,8 +146,6 @@ void GPIOE_Init (void)
 	GPIO_PORTE_AFSEL_R |= 0x0C; // 0000 1100, PE3 and PE2 alternative funct on
 	GPIO_PORTE_AMSEL_R |= 0x0C; //0000 1100, PE3 and PE2 analog funct on
 	
-	
-	
 }
 
 void ADC0_Init_SoftwareTrigger (void)
@@ -168,3 +163,13 @@ void ADC0_Init_SoftwareTrigger (void)
 	ADC0_ACTSS |= 0x04; //enable sample sequencer 2 again
 	
 }
+
+void SysTick_Init (void)
+{
+	NVIC_STCTRL_R = 0;
+	NVIC_STRELOAD_R = 7200 -1; //Standard PWM is 45% from 16000 cycles per second or 1kHz from 16 mHz 
+	NVIC_STCURRENT_R = 0;
+	NVIC_STCTRL_R = 0x07;
+}
+
+
