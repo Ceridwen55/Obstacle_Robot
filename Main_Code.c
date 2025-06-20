@@ -71,9 +71,9 @@ Create a simple robot that can handle obstacle and keep moving forward. Using PW
 
 //CLOCK
 #define SYSCTL_RCGCGPIO_R       (*((volatile uint32_t *)0x400FE608)) //RCGCGPIO Address offset 0x608
-#define SYSCTL_RCGCADC_R       (*((volatile uint32_t *)0x400FE638)) //RCGCADC Address offset 0x638
-#define SYSCTL_PRGPIO_R        (*((volatile uint32_t *)0x400FEA08)) //Peripheral Ready GPIO Address offset 0xA08
-#define SYSCTL_PRADC_R         (*((volatile uint32_t *)0x400FEA38)) //Peripheral Ready ADC Address offset 0xA38
+#define SYSCTL_RCGCADC_R        (*((volatile uint32_t *)0x400FE638)) //RCGCADC Address offset 0x638
+#define SYSCTL_PRGPIO_R         (*((volatile uint32_t *)0x400FEA08)) //Peripheral Ready GPIO Address offset 0xA08
+#define SYSCTL_PRADC_R          (*((volatile uint32_t *)0x400FEA38)) //Peripheral Ready ADC Address offset 0xA38
 
 //GPIO A
 
@@ -111,7 +111,7 @@ Create a simple robot that can handle obstacle and keep moving forward. Using PW
 #define ADC0_PSSI			 	   		 (*((volatile uint32_t *)0x40038028)) //Offset 0x028
 #define ADC0_RIS				 	   	 (*((volatile uint32_t *)0x40038004)) //Offset 0x004
 #define ADC0_SSFIFO3				 	 (*((volatile uint32_t *)0x400380A8)) //Offset 0x0A8
-#define ADC0_ISC				 	   (*((volatile uint32_t *)0x4003800C)) //Offset 0x00C
+#define ADC0_ISC				 	     (*((volatile uint32_t *)0x4003800C)) //Offset 0x00C
 
 
 
@@ -133,4 +133,28 @@ void WaitForInterrupts(void) {
 }
 
 
+void GPIOA_Init (void)
+{
+	SYSCTL_RCGCGPIO_R |= 0x01;  //0000 0001 , turn on Port A clock
+	GPIO_PORTA_DIR_R |= 0x30; //0011 0000, PA4 and PA5 as output
+	GPIO_PORTA_DEN_R |= 0x30; //0011 0000, PA4 and PA5 use digital funct
+	GPIO_PORTA_DR8R |= 0x30; //0011 0000, PA4 and PA5 has 8mA drive ( for dc motor amps)
+}
 
+void GPIOK_Init (void)
+{
+	SYSCTL_RCGCGPIO_R |= 0x10; //0001 000"1", turn on port E clock yet not disturbing previous setup on Port A
+	GPIO_PORTA_DEN_R &= ~0xFF; //0000 0000, make everything 0
+	GPIO_PORTE_DIR_R &= ~0x0C; //1111 0011, make PE3 and PE2 input
+	GPIO_PORTE_AFSEL_R |= 0x0C; // 0000 1100, PE3 and PE2 alternative funct on
+	GPIO_PORTE_AMSEL_R |= 0x0C; //0000 1100, PE3 and PE2 analog funct on
+	
+	
+	
+}
+
+void ADC0_Init_SoftwareTrigger (void)
+{
+	SYSCTL_RCGCADC_R |= 0x01; //0000 0001, turn on ADC0
+	
+}
