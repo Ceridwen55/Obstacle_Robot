@@ -115,7 +115,15 @@ Create a simple robot that can handle obstacle and keep moving forward. Using PW
 
 
 
+//*** GLOBAL VARIABLE ***///
 
+uint8_t flag;
+uint32_t sensors_data;
+uint8_t standard = 16000;
+uint32_t right_sensor; //for PE2
+uint32_t left_sensor; // for PE3
+uint32_t distance_right;
+uint32_t distance_left;
 
 
 //**FUNCTIONS**//
@@ -167,9 +175,35 @@ void ADC0_Init_SoftwareTrigger (void)
 void SysTick_Init (void)
 {
 	NVIC_STCTRL_R = 0;
-	NVIC_STRELOAD_R = 7200 -1; //Standard PWM is 45% from 16000 cycles per second or 1kHz from 16 mHz 
+	NVIC_STRELOAD_R = standard -1; //Standard freq is 6000 cycles per second or 1kHz from 16 mHz 
 	NVIC_STCURRENT_R = 0;
 	NVIC_STCTRL_R = 0x07;
 }
 
+uint32_t Sensor_Result_ADC_Right (void)
+{
+ 
+ ADC0_PSSI = 0x04; //Activate SS2
+ while((ADC0_RIS&0x04)==0){}; //if not 0 (its one), it will proceed the looping
+ right_sensor= ADC0_SSFIFO2 & 0xFFF;
+ distance_right = 241814 / right_sensor; //returning distance that is the result of result divided by empirical constant (241814)
+ ADC0_ISC = 0x04; //clear interrupt flag for SS2
+ return distance_right;
+}
 
+uint32_t Sensor_Result_ADC_Left (void)
+{
+ left_sensor = ADC0_SSFIFO2 & 0xFFF;
+ distance_left = 24814 / left_sensor; //returning distance that is the result of result divided by empirical constant (241814)
+ ADC0_ISC = 0x04; //clear interrupt flag for SS2
+ return distance_left;
+}
+
+void SysTick_Handler (void)
+{
+ 
+	Sensor_Result_ADC_Right();
+	Sensor_Result_ADC_Left();
+
+
+}
