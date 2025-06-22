@@ -114,6 +114,13 @@ Create a simple robot that can handle obstacle and keep moving forward. Using PW
 #define ADC0_ISC				 	     (*((volatile uint32_t *)0x4003800C)) //Offset 0x00C
 
 
+//*** PROTOTYPE ***//
+
+uint32_t Sensor_Result_ADC_Right(void);
+uint32_t Sensor_Result_ADC_Left(void);
+void GPIOA_Init(void);
+void GPIOE_Init (void);
+
 
 //*** GLOBAL VARIABLE ***///
 
@@ -124,10 +131,13 @@ uint32_t right_sensor; //for PE2
 uint32_t left_sensor; // for PE3
 uint32_t distance_right;
 uint32_t distance_left;
-uint32_t high,low = 16000;
-uint32_t low;
-uint32_t standard_high = 7200; //if no problem, this is the standard PWM for high
-uint32_t standard_low = 8800; // if no problem, this is the standard PWM for low
+uint32_t standard_high_right = 7200; //if no problem, this is the standard PWM for high
+uint32_t standard_low_right = 8800; // if no problem, this is the standard PWM for low
+
+uint32_t standard_high_left = 7200; //if no problem, this is the standard PWM for high
+uint32_t standard_low_left = 8800; // if no problem, this is the standard PWM for low
+
+uint32_t counter_pwm = 0;
 
 
 
@@ -215,26 +225,80 @@ void SysTick_Handler (void) //here we are using SysTick to help collecting Data 
 	if( GPIO_PORTA_DATA_R & 0x10 ) //if PA4 is high
 	{
 		GPIO_PORTA_DATA_R &= ~0x10; //turn off PA4 or low
-		NVIC_STRELOAD_R = standard_low - 1; // make sure PA4 being low as per 8800 cycles per second or 55% low
+		NVIC_STRELOAD_R = standard_low_right - 1; // make sure PA4 being low as per 8800 cycles per second or 55% low
 	}
 	else
 	{
 		GPIO_PORTA_DATA_R |= 0x10; // turn PA4 high
-		NVIC_STRELOAD_R = standard_high - 1; //make sure PA4 being high as per 7200 cycles per second or 45% high
+		NVIC_STRELOAD_R = standard_high_right - 1; //make sure PA4 being high as per 7200 cycles per second or 45% high
 	}
 	
 	//FOR PA5
 	if (GPIO_PORTA_DATA_R & 0x20) //if PA5 is high
 	{
 		GPIO_PORTA_DATA_R &= ~0x20; //turn off PA5 or low
-		NVIC_STRELOAD_R = standard_low -1 ; // make sure PA5 being low as per 8800 cycles per second or 55% low
+		NVIC_STRELOAD_R = standard_low_left -1 ; // make sure PA5 being low as per 8800 cycles per second or 55% low
 	}
 	else
 	{
 		GPIO_PORTA_DATA_R |= 0x20; // turn on PA5 or high
-		NVIC_STRELOAD_R = standard_high -1; //make sure PA4 being high as per 7200 cycles per second or 45% high
+		NVIC_STRELOAD_R = standard_high_left -1; //make sure PA4 being high as per 7200 cycles per second or 45% high
 	}
 	
-	//General idea for reload subtitution is ready, now lets create the logic in the while loop at main funct
+	//FOR Controlling Independent PWMcon each PA4 and PA5
 	
+	
+	counter_pwm = (counter_pwm + 1) % 16000; // If exceed 16000, will reset to 0 again
+	
+	if( counter_pwm < standard_high_right )
+	{
+		GPIO_PORTA_DATA_R |= 0x10;
+	}
+	else
+	{
+		GPIO_PORTA_DATA_R &= ~0x10;
+	}
+	
+	if (counter_pwm < standard_high_left )
+	{
+		GPIO_PORTA_DATA_R |= 0x20;
+	}
+	else
+	{
+		GPIO_PORTA_DATA_R &= ~0x20;
+	}
+	
+	
+}
+
+	
+
+
+int main (void)
+{
+	GPIOA_Init();
+	GPIOE_Init();
+	SysTick_Init();
+	EnableInterrupts();
+	while(1)
+	{
+		if( data_right <= 1100 )
+		{
+			standard_high_right = 9600; //60% high on the right
+			standard_low_right = 16000 - standard_high_right;
+			
+			standard_high_left = 4800; // 30% high on the left
+			standard_low_left = 16000- standard_high_left;
+		}
+		else
+		{
+			standard_high_right = 7200;
+			standard_high_left = 8800;
+			
+			standard_high_left = 7200;
+			standard_low_left = 8800;
+		}
+		
+		WaitForInterrupts();
+	}
 }
