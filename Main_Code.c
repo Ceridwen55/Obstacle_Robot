@@ -192,88 +192,93 @@ void ADC0_Init_SoftwareTrigger (void)
 void SysTick_Init (void)
 {
 	NVIC_STCTRL_R = 0;
-	NVIC_STRELOAD_R = low - 1; //Standard freq is 16000 cycles per second or 1kHz from 16 mHz 
+	NVIC_STRELOAD_R = 16000 - 1; //Standard freq is 16000 cycles per second or 1kHz from 16 mHz 
 	NVIC_STCURRENT_R = 0;
 	NVIC_STCTRL_R = 0x07;
 }
 
-uint32_t Sensor_Result_ADC_Right (void)
+void Read_Sensors_ADC (void)
 {
  
  ADC0_PSSI = 0x04; //Activate SS2
  while((ADC0_RIS&0x04)==0){}; //if not 0 (its one), it will proceed the looping
  right_sensor= ADC0_SSFIFO2 & 0xFFF;
+ left_sensor = ADC0_SSFIFO2 & 0xFFF;
  distance_right = 241814 / right_sensor; //returning distance that is the result of result divided by empirical constant (241814)
+ distance_left = 241814 / left_sensor; //returning distance that is the result of result divided by empirical constant (241814)
  ADC0_ISC = 0x04; //clear interrupt flag for SS2
- return distance_right;
+
 }
 
-uint32_t Sensor_Result_ADC_Left (void)
+
+void Robot_Logic (void)
 {
- left_sensor = ADC0_SSFIFO2 & 0xFFF;
- distance_left = 24814 / left_sensor; //returning distance that is the result of result divided by empirical constant (241814)
- ADC0_ISC = 0x04; //clear interrupt flag for SS2
- return distance_left;
+	int32_t Error = distance_right - distance_left; // Using int cause can be - or negative, if 0, move straight ( that's the plan ), this is in mm
+	
+	//Distance right (further from object) > distance left (closer to object ), turn right until error = 0
+	if ( Error > 0 ) 
+	{	
+		
+		standard_high_right = 9600; // 60% PWM right
+		standard_high_left = 4800; // 30% PWM left
+	}
+	else if ( Error == 0 ) //back to normal
+	{
+		standard_high_right = 7200; //45%
+		standard_high_left = 7200; //45%
+	}
+	
+	// Distance right (closer to object ) < distance left (further from object )
+	if ( Error < 0 )
+	{
+		standard_high_left = 9600; //60% PWM left
+		standard_high_right = 4800; //30% PWM right
+	}
+	else if ( Error == 0 )
+	{
+		standard_high_left = 7200; //45%
+		standard_high_right = 7200; //45%
+	}
+	
+	standard_low_left = 16000 - standard_high_left;
+	standard_low_right = 16000 - standard_high_right;
+	
 }
 
 void SysTick_Handler (void) //here we are using SysTick to help collecting Data and control the PWM of the DC Motor
 {
-	data_right = Sensor_Result_ADC_Right(); // data from right sensor, in distance (mm)
-	data_left = Sensor_Result_ADC_Left(); // data from left sensor, in distance (mm)
+	//Reading sensors
+	Read_Sensors_ADC();
 	
-	//FOR PA4
-	if( GPIO_PORTA_DATA_R & 0x10 ) //if PA4 is high
-	{
-		GPIO_PORTA_DATA_R &= ~0x10; //turn off PA4 or low
-		NVIC_STRELOAD_R = standard_low_right - 1; // make sure PA4 being low as per 8800 cycles per second or 55% low
-	}
-	else
-	{
-		GPIO_PORTA_DATA_R |= 0x10; // turn PA4 high
-		NVIC_STRELOAD_R = standard_high_right - 1; //make sure PA4 being high as per 7200 cycles per second or 45% high
-	}
+	//Logic on how the robot move/takes decision
+	Robot_Logic();
 	
-	//FOR PA5
-	if (GPIO_PORTA_DATA_R & 0x20) //if PA5 is high
-	{
-		GPIO_PORTA_DATA_R &= ~0x20; //turn off PA5 or low
-		NVIC_STRELOAD_R = standard_low_left -1 ; // make sure PA5 being low as per 8800 cycles per second or 55% low
-	}
-	else
-	{
-		GPIO_PORTA_DATA_R |= 0x20; // turn on PA5 or high
-		NVIC_STRELOAD_R = standard_high_left -1; //make sure PA4 being high as per 7200 cycles per second or 45% high
-	}
-	
-	//FOR Controlling Independent PWMcon each PA4 and PA5
-	
-	
+	//For Controlling Independent PWM on each PA4 and PA5
 	counter_pwm = (counter_pwm + 1) % 16000; // If exceed 16000, will reset to 0 again
 	
-	if( counter_pwm < standard_high_right )
+	if( counter_pwm < standard_high_right ) //NVIC reload value is absolute, but we can manipulate as per variable to control on and off too so the PWM will be independent on each DC motor
 	{
-		GPIO_PORTA_DATA_R |= 0x10;
+		GPIO_PORTA_DATA_R |= 0x10; //Will be HIGH on how much the robot logic decision
 	}
 	else
 	{
-		GPIO_PORTA_DATA_R &= ~0x10;
+		GPIO_PORTA_DATA_R &= ~0x10;//Will be LOW on how much the subtraction of high and 16000 ( standard systick freq )
 	}
 	
 	if (counter_pwm < standard_high_left )
 	{
-		GPIO_PORTA_DATA_R |= 0x20;
+		GPIO_PORTA_DATA_R |= 0x20; //Will be HIGH on how much the robot logic decision
 	}
+	
 	else
 	{
-		GPIO_PORTA_DATA_R &= ~0x20;
+		GPIO_PORTA_DATA_R &= ~0x20; //Will be LOW on how much the subtraction of high and 16000 ( standard systick freq )
 	}
 	
 	
 }
 
 	
-
-
 int main (void)
 {
 	GPIOA_Init();
@@ -282,22 +287,6 @@ int main (void)
 	EnableInterrupts();
 	while(1)
 	{
-		if( data_right <= 1100 )
-		{
-			standard_high_right = 9600; //60% high on the right
-			standard_low_right = 16000 - standard_high_right;
-			
-			standard_high_left = 4800; // 30% high on the left
-			standard_low_left = 16000- standard_high_left;
-		}
-		else
-		{
-			standard_high_right = 7200;
-			standard_high_left = 8800;
-			
-			standard_high_left = 7200;
-			standard_low_left = 8800;
-		}
 		
 		WaitForInterrupts();
 	}
