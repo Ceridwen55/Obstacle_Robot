@@ -43,20 +43,21 @@ Create a simple robot that can handle obstacle and keep moving forward. Using PW
 1. PCB will be designed in KiCad and printed to subtitute breadboards and jumpers
 
 2. DC Motor Circuit
-	- 2 DC Motors 3-12V Model F130( actuators )
+	- 2 DC Motors 3-7V Model F130( actuators )
 	- 2 Distance Sensors Sharp GP2Y0A21YK0F ( sensors )
 	- 3 LiOn Battery 3.71 V ( power source ) and one set of 3-battery slot
 	- 2 Capacitors 10 micro farad ( Controlling noise from input and output )
 	- 1 regulator L7805CV ( Regulating voltage from 11.13 v source to Vin MCU and sensors )
 	- 2 Transistors MOSFET IRLB3034 ( Logic control from MCU to Motors )
-	- 2 Diodes LN4002 ( Protect MCU )
+	- 2 Diodes 1N4002 ( Protect MCU )
 	- 2 220 Ohm resistors ( protect GPIO to gate Transistor)
 	- 2 10k Ohm resistors ( pull down so it will stabilize motor while MCU turns on )
+	- 1 LM2596 DC-DC
 	
 3. Robot Body and Attachment
 	- 2 wheels attached to the DC Motors 78MM Dual Shaft( choose with the good friction and low load for the motor to spin)
 	- 2 WD Casis kit
-	- To be continued
+	
 
 */
 
@@ -179,11 +180,11 @@ void ADC0_Init_SoftwareTrigger (void)
 	while((SYSCTL_PRGPIO_R & 0x0C) != 0x0c); // loop for stabilization, if false then proceed, if true then loop is still looping
 	ADC0_PC &= ~0xF; //reset all bits to 0 for ADCPC reg
 	ADC0_PC |= 0x01; //set to 128 Khz, why? cause delay 112 Tadc, with average 13 Tadc for conversion to happen, so if ADC clock 16 Mhz / 125 = 128 kHz
-	ADC0_SSPRI |= 0x1023; // 1 for SS3, 0 for SS2, 2 for SS1, 3 for SS0. Smaller the number, higher the priority so SS2 is the highest
+	ADC0_SSPRI = 0x1023; // 1 for SS3, 0 for SS2, 2 for SS1, 3 for SS0. Smaller the number, higher the priority so SS2 is the highest
 	ADC0_ACTSS &= ~0x04; //Disable Sample Sequencer 2 ( SS2)
 	ADC0_EMUX &= ~0x0F00; //Software Trigger for seq 2
-	ADC0_SSMUX2 = 0x01; //1 for AIN1 because PE2 at bit 0-3 at step 0, 0 for AIN0 because PE3 at bit 4-7 at step 1
-	ADC0_SSCTL2 = 0x66; // IE0 and END0 for step 0 and IE1 and END1 for step 1
+	ADC0_SSMUX2 = 0x01 | 0x00; //1 for AIN1 because PE2 at bit 0-3 at step 0, 0 for AIN0 because PE3 at bit 4-7 at step 1
+	ADC0_SSCTL2 = 0x06 | 0x60; // IE0 and END0 for step 0 and IE1 and END1 for step 1
 	ADC0_IM &= ~0x04; // disable interrupt mask for SS2
 	ADC0_ACTSS |= 0x04; //enable sample sequencer 2 again
 	
@@ -284,6 +285,7 @@ int main (void)
 	GPIOA_Init();
 	GPIOE_Init();
 	SysTick_Init();
+	ADC0_Init_SoftwareTrigger();
 	EnableInterrupts();
 	while(1)
 	{

@@ -1504,6 +1504,304 @@
 			)
 			(embedded_fonts no)
 		)
+		(symbol "Regulator_Switching:CRE1S1205SC"
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "U"
+				(at -8.89 8.89 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "CRE1S1205SC"
+				(at 2.54 8.89 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" "Converter_DCDC:Converter_DCDC_Murata_CRE1xxxxxxSC_THT"
+				(at 0 -10.16 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "http://power.murata.com/datasheet?/data/power/ncl/kdc_cre1.pdf"
+				(at 0 -12.7 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "12V to 5V 200mA DC-DC Converter with 1kV isolation, SIP-4"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_keywords" "Murata isolated isolation dc-dc converter transformer"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_fp_filters" "Converter*DCDC*Murata*CRE1xxxxxxSC*"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "CRE1S1205SC_0_1"
+				(rectangle
+					(start -10.16 7.62)
+					(end 10.16 -7.62)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+				(polyline
+					(pts
+						(xy -0.635 7.366) (xy -0.635 6.096)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -0.635 4.826) (xy -0.635 3.556)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -0.635 2.286) (xy -0.635 1.016)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -0.635 -0.254) (xy -0.635 -1.524)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -0.635 -2.794) (xy -0.635 -4.064)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -0.635 -5.334) (xy -0.635 -6.604)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 0.635 5.334) (xy 0.635 6.604)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 0.635 2.794) (xy 0.635 4.064)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 0.635 0.254) (xy 0.635 1.524)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 0.635 -2.286) (xy 0.635 -1.016)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 0.635 -4.826) (xy 0.635 -3.556)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 0.635 -7.366) (xy 0.635 -6.096)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "CRE1S1205SC_1_1"
+				(pin power_in line
+					(at -12.7 5.08 0)
+					(length 2.54)
+					(name "+VIN"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at -12.7 -5.08 0)
+					(length 2.54)
+					(name "-VIN"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_out line
+					(at 12.7 5.08 180)
+					(length 2.54)
+					(name "+VOUT"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_out line
+					(at 12.7 -5.08 180)
+					(length 2.54)
+					(name "-VOUT"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
 		(symbol "TM4C1294XL_LaunchPad_Base:TM4C_LAUNCHPAD"
 			(exclude_from_sim no)
 			(in_bom yes)
@@ -3413,10 +3711,10 @@
 		)
 	)
 	(junction
-		(at 300.99 106.68)
+		(at 172.72 175.26)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "0763b5ad-8be6-427f-83a8-84c288912dfd")
+		(uuid "0fb211ff-2816-4757-b895-b5c121c3c52f")
 	)
 	(junction
 		(at 290.83 114.3)
@@ -3449,6 +3747,12 @@
 		(uuid "3c86bc1e-31f4-4193-8860-9ede485729a0")
 	)
 	(junction
+		(at 162.56 40.64)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "45fd3e6b-7763-41cc-ba1e-cd1069efce46")
+	)
+	(junction
 		(at 154.94 60.96)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -3461,28 +3765,10 @@
 		(uuid "48cbdbe3-21db-4140-ae6c-00ecf7de8e8d")
 	)
 	(junction
-		(at 313.69 130.81)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "49d99863-8859-48ff-8d69-0376ebbe4bdf")
-	)
-	(junction
-		(at 162.56 40.64)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "60717310-a85b-41e9-842e-f5c13eb30422")
-	)
-	(junction
 		(at 274.32 187.96)
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "64b8f946-cf0f-4ea7-8880-d0a342821037")
-	)
-	(junction
-		(at 302.26 130.81)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "8769dd98-f54d-4203-ab7c-db18b2a8c840")
 	)
 	(junction
 		(at 154.94 52.07)
@@ -3495,6 +3781,24 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "95e81e2e-2a1e-4698-a203-458e07086a0e")
+	)
+	(junction
+		(at 156.21 44.45)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "a114cdfb-43fd-426c-a0c0-24c423287a85")
+	)
+	(junction
+		(at 295.91 106.68)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "a13ec1cb-d68e-45ee-8372-bea3c231d31f")
+	)
+	(junction
+		(at 172.72 165.1)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "caa3f243-2e38-411b-94bc-e58ad3f2df51")
 	)
 	(junction
 		(at 171.45 78.74)
@@ -3543,24 +3847,6 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "f817244e-494e-459a-b2bd-31fb938b7400")
-	)
-	(junction
-		(at 283.21 106.68)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "fec2ec18-7c05-4c67-bfcb-40465ab8e14e")
-	)
-	(junction
-		(at 313.69 106.68)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "ff0d5a28-68c2-4bfd-804c-a521794a61bd")
-	)
-	(junction
-		(at 156.21 44.45)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "ffaf92a5-48c0-4e94-9ef5-8151b60652f9")
 	)
 	(no_connect
 		(at 157.48 166.37)
@@ -3613,10 +3899,6 @@
 	(no_connect
 		(at 201.93 162.56)
 		(uuid "293c3a94-ef51-4f78-890f-18a0621b7c46")
-	)
-	(no_connect
-		(at 181.61 111.76)
-		(uuid "2aa69e09-eb85-4a3e-9bf2-59867b790e7d")
 	)
 	(no_connect
 		(at 181.61 119.38)
@@ -3739,10 +4021,6 @@
 		(uuid "89da73f0-5183-46da-83fe-65e6e477d384")
 	)
 	(no_connect
-		(at 153.67 149.86)
-		(uuid "89e89018-507e-42d5-bb8a-2d126d388d91")
-	)
-	(no_connect
 		(at 181.61 143.51)
 		(uuid "8df1e987-373d-415f-9e3d-2f8afc7bc908")
 	)
@@ -3781,6 +4059,10 @@
 	(no_connect
 		(at 157.48 96.52)
 		(uuid "ac6c299c-2405-43da-b216-d8c17f3bccbb")
+	)
+	(no_connect
+		(at 201.93 111.76)
+		(uuid "b1b04166-b072-4ea0-8d3a-f28453a03104")
 	)
 	(no_connect
 		(at 157.48 92.71)
@@ -3940,26 +4222,6 @@
 	)
 	(wire
 		(pts
-			(xy 172.72 165.1) (xy 172.72 175.26)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "1216dbbd-18b5-47cb-ba45-882fdc3d1a62")
-	)
-	(wire
-		(pts
-			(xy 313.69 187.96) (xy 313.69 130.81)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "16c902b2-a837-462b-b05d-649a895806e9")
-	)
-	(wire
-		(pts
 			(xy 292.1 146.05) (xy 302.26 146.05)
 		)
 		(stroke
@@ -3990,16 +4252,6 @@
 	)
 	(wire
 		(pts
-			(xy 300.99 106.68) (xy 300.99 114.3)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "2df561fc-a57c-490c-a35d-99877bbaafc5")
-	)
-	(wire
-		(pts
 			(xy 119.38 209.55) (xy 119.38 218.44)
 		)
 		(stroke
@@ -4007,16 +4259,6 @@
 			(type default)
 		)
 		(uuid "2e1dbb4f-67ed-452d-b7fc-b5f2ebe6d201")
-	)
-	(wire
-		(pts
-			(xy 302.26 146.05) (xy 302.26 130.81)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "2f9f4b96-2f28-4003-8183-80a842244245")
 	)
 	(wire
 		(pts
@@ -4040,7 +4282,7 @@
 	)
 	(wire
 		(pts
-			(xy 119.38 135.89) (xy 119.38 199.39)
+			(xy 121.92 135.89) (xy 121.92 137.16)
 		)
 		(stroke
 			(width 0)
@@ -4057,6 +4299,16 @@
 			(type default)
 		)
 		(uuid "345d7776-7482-48bc-b4cd-06d3c6117847")
+	)
+	(wire
+		(pts
+			(xy 156.21 44.45) (xy 214.63 44.45)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "36ec88be-cee9-4d77-96af-f58d0bea519d")
 	)
 	(wire
 		(pts
@@ -4080,7 +4332,7 @@
 	)
 	(wire
 		(pts
-			(xy 119.38 135.89) (xy 134.62 135.89)
+			(xy 121.92 135.89) (xy 137.16 135.89)
 		)
 		(stroke
 			(width 0)
@@ -4110,7 +4362,17 @@
 	)
 	(wire
 		(pts
-			(xy 302.26 128.27) (xy 302.26 130.81)
+			(xy 334.01 36.83) (xy 334.01 106.68)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "46b09f1a-d2c0-4429-8fb1-84735c67c744")
+	)
+	(wire
+		(pts
+			(xy 302.26 128.27) (xy 302.26 146.05)
 		)
 		(stroke
 			(width 0)
@@ -4130,6 +4392,16 @@
 	)
 	(wire
 		(pts
+			(xy 214.63 44.45) (xy 214.63 46.99)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4b3597e5-3b8b-4d7a-992f-e7602a7d3d56")
+	)
+	(wire
+		(pts
 			(xy 248.92 170.18) (xy 248.92 114.3)
 		)
 		(stroke
@@ -4140,23 +4412,23 @@
 	)
 	(wire
 		(pts
-			(xy 156.21 44.45) (xy 313.69 44.45)
+			(xy 214.63 40.64) (xy 214.63 36.83)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "50e8aed2-7cff-4837-9681-f575197b4419")
+		(uuid "4f8b607d-0387-4d13-9e22-c034db74cb79")
 	)
 	(wire
 		(pts
-			(xy 119.38 232.41) (xy 214.63 232.41)
+			(xy 295.91 106.68) (xy 334.01 106.68)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "5a9f4393-1717-4ba1-92cb-be55dbf95b33")
+		(uuid "5b457966-1b83-4953-8d71-b6cbacff227f")
 	)
 	(wire
 		(pts
@@ -4170,6 +4442,16 @@
 	)
 	(wire
 		(pts
+			(xy 240.03 46.99) (xy 313.69 46.99)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "5c0b305f-ba7c-44d6-bd99-ac179610b313")
+	)
+	(wire
+		(pts
 			(xy 162.56 73.66) (xy 171.45 73.66)
 		)
 		(stroke
@@ -4177,6 +4459,16 @@
 			(type default)
 		)
 		(uuid "5ea2442b-9878-45cf-afee-96e89329dd99")
+	)
+	(wire
+		(pts
+			(xy 172.72 111.76) (xy 181.61 111.76)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "60d7d283-b0b0-4e1d-8c33-0b3758fa2e60")
 	)
 	(wire
 		(pts
@@ -4220,13 +4512,13 @@
 	)
 	(wire
 		(pts
-			(xy 201.93 111.76) (xy 214.63 111.76)
+			(xy 313.69 46.99) (xy 313.69 187.96)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "7a62d04e-5089-4a77-bda7-6febd0e543a7")
+		(uuid "7b6afd77-559b-428d-b835-61de710b458f")
 	)
 	(wire
 		(pts
@@ -4260,6 +4552,26 @@
 	)
 	(wire
 		(pts
+			(xy 172.72 111.76) (xy 172.72 165.1)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "801fbb34-1255-4d4c-bcd5-64f7487aa79a")
+	)
+	(wire
+		(pts
+			(xy 172.72 165.1) (xy 172.72 175.26)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8502708a-175c-4835-912a-cc93e4050718")
+	)
+	(wire
+		(pts
 			(xy 274.32 175.26) (xy 276.86 175.26)
 		)
 		(stroke
@@ -4270,7 +4582,7 @@
 	)
 	(wire
 		(pts
-			(xy 300.99 104.14) (xy 300.99 106.68)
+			(xy 300.99 104.14) (xy 300.99 114.3)
 		)
 		(stroke
 			(width 0)
@@ -4320,13 +4632,13 @@
 	)
 	(wire
 		(pts
-			(xy 313.69 44.45) (xy 313.69 106.68)
+			(xy 162.56 40.64) (xy 214.63 40.64)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "8e8ecd89-307d-47a7-8e63-a7ce3cc3bf2f")
+		(uuid "8fb13865-9ed4-4d7d-8f98-76bd8920957a")
 	)
 	(wire
 		(pts
@@ -4357,16 +4669,6 @@
 			(type default)
 		)
 		(uuid "92def57b-9171-446a-8dd1-5d7dab80fbf4")
-	)
-	(wire
-		(pts
-			(xy 214.63 232.41) (xy 214.63 111.76)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "9392d869-a6ec-4242-bcb4-903b4f0dd546")
 	)
 	(wire
 		(pts
@@ -4410,13 +4712,23 @@
 	)
 	(wire
 		(pts
-			(xy 302.26 130.81) (xy 313.69 130.81)
+			(xy 240.03 36.83) (xy 334.01 36.83)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "a2a9c193-7b8a-4163-a25a-d2be1e9ad367")
+		(uuid "a2e3fe11-5975-47fc-8d98-31795d6fcc6d")
+	)
+	(wire
+		(pts
+			(xy 119.38 137.16) (xy 119.38 199.39)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a4780043-285f-4aa7-a4c0-9472f1cb219a")
 	)
 	(wire
 		(pts
@@ -4540,16 +4852,6 @@
 	)
 	(wire
 		(pts
-			(xy 300.99 106.68) (xy 313.69 106.68)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "c71b97a8-b099-41ab-b66c-bfb44a4b824a")
-	)
-	(wire
-		(pts
 			(xy 179.07 181.61) (xy 260.35 181.61)
 		)
 		(stroke
@@ -4577,16 +4879,6 @@
 			(type default)
 		)
 		(uuid "cc15f826-32a0-4875-9d4f-927fbce52979")
-	)
-	(wire
-		(pts
-			(xy 162.56 40.64) (xy 283.21 40.64)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "d6657099-9754-4658-9791-e40c4e147fad")
 	)
 	(wire
 		(pts
@@ -4650,16 +4942,6 @@
 	)
 	(wire
 		(pts
-			(xy 283.21 40.64) (xy 283.21 106.68)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "e83383d0-cd48-43b7-bf57-d4ff91f614be")
-	)
-	(wire
-		(pts
 			(xy 267.97 181.61) (xy 271.78 181.61)
 		)
 		(stroke
@@ -4670,13 +4952,23 @@
 	)
 	(wire
 		(pts
-			(xy 313.69 106.68) (xy 313.69 130.81)
+			(xy 121.92 137.16) (xy 119.38 137.16)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "ee46716a-b8ee-4f83-9abd-a0df0d1b4609")
+		(uuid "ec4d3021-ceca-43aa-af91-e1dc1e99022a")
+	)
+	(wire
+		(pts
+			(xy 172.72 175.26) (xy 172.72 232.41)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f08b8161-6c66-45b5-9845-1df6d158cee1")
 	)
 	(wire
 		(pts
@@ -4727,6 +5019,16 @@
 			(type default)
 		)
 		(uuid "fda77d0d-af01-47ab-8899-861219a06743")
+	)
+	(wire
+		(pts
+			(xy 119.38 232.41) (xy 172.72 232.41)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ffc76b40-ddd4-4417-b8df-91a796793b88")
 	)
 	(symbol
 		(lib_id "GP2Y0A21YK0F:GP2Y0A21YK0F")
@@ -6046,6 +6348,80 @@
 			(project ""
 				(path "/88f46f96-e7ed-4159-9de2-661bf764b365"
 					(reference "U3")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Regulator_Switching:CRE1S1205SC")
+		(at 227.33 41.91 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "c6e9c1ea-e229-4fc6-80ef-00e745d86034")
+		(property "Reference" "U4"
+			(at 227.33 29.21 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "CRE1S1205SC"
+			(at 227.33 31.75 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Converter_DCDC:Converter_DCDC_Murata_CRE1xxxxxxSC_THT"
+			(at 227.33 52.07 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "http://power.murata.com/datasheet?/data/power/ncl/kdc_cre1.pdf"
+			(at 227.33 54.61 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "12V to 5V 200mA DC-DC Converter with 1kV isolation, SIP-4"
+			(at 227.33 41.91 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "3"
+			(uuid "030d059b-c0e4-4799-b729-c972c7fa1163")
+		)
+		(pin "2"
+			(uuid "8895efe4-6c1d-49c4-8fb7-2371327d3780")
+		)
+		(pin "1"
+			(uuid "ff89da33-4746-42b6-a5d2-d50c012c676e")
+		)
+		(pin "4"
+			(uuid "af2a2324-1923-4936-b4c5-024d4a53740b")
+		)
+		(instances
+			(project ""
+				(path "/88f46f96-e7ed-4159-9de2-661bf764b365"
+					(reference "U4")
 					(unit 1)
 				)
 			)
