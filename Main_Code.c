@@ -16,7 +16,7 @@ Create a simple robot that can handle obstacle and keep moving forward. Using PW
 3. Set the PWM function using Systick to automate and control the DC motors PWM
  - Using Systick to control the PWM at right and left DC motors
  - Minimum PWM is 30% on each DC Motor ( High 30%, Low 70%), and Maximum PWM is 60% on each the DC motor, standard is 45%
- - We set the NVIC Reload value for the H+L is 16000, because we need 1000 cycle per second or 1 KHz to make the rotation smoother
+ - We set the NVIC Reload value for the H+L is 16000, because we need 16000 cycle per second or 16 KHz to make the rotation smoother ( PLL base freq change to 120 Mhz to accomodate ADC conversion, 120.000.000 cycles per second)
  - We will get the analog value from the distance sensor and convert it to digital value in another function, based on that statement, we will control the PWM if it should turn right or left or stay
  - We will use this main formula to determine the 'turn', Error = DistanceLeft - DistanceRight
 
@@ -48,7 +48,7 @@ Create a simple robot that can handle obstacle and keep moving forward. Using PW
 	- 3 LiOn Battery 3.71 V ( power source ) and one set of 3-battery slot
 	- 2 Capacitors 10 micro farad ( Controlling noise from input and output )
 	- 1 regulator L7805CV ( Regulating voltage from 11.13 v source to Vin MCU and sensors )
-	- 2 Transistors MOSFET IRLB3034 ( Logic control from MCU to Motors )
+	- 2 Transistors MOSFET IRLB3034 ( Logic control from MCU to Motors ) / Change to TIP 120 cause MCU Voltage not enough to activate IRLB3034
 	- 2 Diodes 1N4002 ( Protect MCU )
 	- 2 220 Ohm resistors ( protect GPIO to gate Transistor)
 	- 2 10k Ohm resistors ( pull down so it will stabilize motor while MCU turns on )
@@ -65,7 +65,13 @@ Create a simple robot that can handle obstacle and keep moving forward. Using PW
 
 
 #include <stdint.h>
-
+#include <stdbool.h>
+#include "inc/hw_memmap.h"
+#include "driverlib/sysctl.h"
+#include "driverlib/gpio.h"
+#include "driverlib/adc.h"
+#include "driverlib/systick.h"
+#include "driverlib/interrupt.h"
 
 
 //*** ADDRESS ***//
@@ -78,7 +84,6 @@ Create a simple robot that can handle obstacle and keep moving forward. Using PW
 
 //GPIO A
 
-#define GPIO_PORTA_BASE					(*((volatile uint32_t *)0x40004000)) //Base address for Port A
 #define GPIO_PORTA_DATA_R       (*((volatile uint32_t *)0x400043FC)) //Offset 0x3fc
 #define GPIO_PORTA_DIR_R        (*((volatile uint32_t *)0x40004400)) //Offset 0x400
 #define GPIO_PORTA_PUR_R        (*((volatile uint32_t *)0x40004510)) //Offset 0x510
@@ -93,7 +98,7 @@ Create a simple robot that can handle obstacle and keep moving forward. Using PW
 	
 	
 //GPIO E
-#define GPIO_PORTE_BASE				 (*((volatile uint32_t *)0x40024000)) //Base address for Port E from page 104 Datasheet TM4C1294XL
+
 #define GPIO_PORTE_DATA_R			 (*((volatile uint32_t *)0x400243FC)) //Offset 0x3fc
 #define GPIO_PORTE_DIR_R			 (*((volatile uint32_t *)0x40024400)) //Offset 0x400
 #define GPIO_PORTE_DEN_R			 (*((volatile uint32_t *)0x4002451C)) //Offset 0x51C
@@ -101,7 +106,7 @@ Create a simple robot that can handle obstacle and keep moving forward. Using PW
 #define GPIO_PORTE_AFSEL_R		 (*((volatile uint32_t *)0x40024420)) //Offset 0x420
 
 //ADC0
-#define ADC0_BASE				 	     (*((volatile uint32_t *)0x40038000)) //Base address for ADC0 from page 1077 Datasheet TM4C1294XL
+
 #define ADC0_ACTSS				 	   (*((volatile uint32_t *)0x40038000)) //Offset 0x000
 #define ADC0_EMUX				 	     (*((volatile uint32_t *)0x40038014)) //Offset 0x014
 #define ADC0_SSPRI				 	   (*((volatile uint32_t *)0x40038020)) //Offset 0x020
@@ -130,6 +135,7 @@ uint32_t data_right;
 uint32_t data_left;
 uint32_t right_sensor; //for PE2
 uint32_t left_sensor; // for PE3
+uint32_t distance[2];
 uint32_t distance_right;
 uint32_t distance_left;
 uint32_t standard_high_right = 7200; //if no problem, this is the standard PWM for high
@@ -154,6 +160,10 @@ void WaitForInterrupts(void) {
     __asm("WFI");  // WFI = Wait For Interrupt instruction
 }
 
+void PLL_Init(void)
+{
+	uint32_t sys_clk = SysCtlClockFreqSet((SYSCTL_XTAL_25MHZ | SYSCTL_OSC_MAIN | SYSCTL_USE_PLL | SYSCTL_CFG_VCO_480),120000000);
+}
 
 void GPIOA_Init (void)
 {
@@ -176,8 +186,17 @@ void GPIOE_Init (void)
 
 void ADC0_Init_SoftwareTrigger (void)
 {
+	
+	ADCSequenceConfigure(ADC0_BASE, 2, ADC_TRIGGER_PROCESSOR, 0); //Sequencer 2 is used
+	ADCSequenceStepConfigure(ADC0_BASE, 2, 0, ADC_CTL_CH0); //Step 0 PE3 (AIN 0)
+	ADCSequenceStepConfigure(ADC0_BASE, 2, 1, ADC_CTL_CH1 | ADC_CTL_IE | ADC_CTL_END); //Step 1 PE2 (AIN 1)
+	ADCSequenceEnable(ADC0_BASE, 2);
+  ADCIntClear(ADC0_BASE, 2);
+	
+	
+	/*
 	SYSCTL_RCGCADC_R |= 0x01; //0000 0001, turn on ADC0
-	while((SYSCTL_PRGPIO_R & 0x0C) != 0x0c); // loop for stabilization, if false then proceed, if true then loop is still looping
+	while(!SysCtlPeripheralReady(SYSCTL_PERIPH_ADC0));
 	ADC0_PC &= ~0xF; //reset all bits to 0 for ADCPC reg
 	ADC0_PC |= 0x01; //set to 128 Khz, why? cause delay 112 Tadc, with average 13 Tadc for conversion to happen, so if ADC clock 16 Mhz / 125 = 128 kHz
 	ADC0_SSPRI = 0x1023; // 1 for SS3, 0 for SS2, 2 for SS1, 3 for SS0. Smaller the number, higher the priority so SS2 is the highest
@@ -187,27 +206,34 @@ void ADC0_Init_SoftwareTrigger (void)
 	ADC0_SSCTL2 = 0x06 | 0x60; // IE0 and END0 for step 0 and IE1 and END1 for step 1
 	ADC0_IM &= ~0x04; // disable interrupt mask for SS2
 	ADC0_ACTSS |= 0x04; //enable sample sequencer 2 again
+	*/
 	
 }
 
 void SysTick_Init (void)
 {
 	NVIC_STCTRL_R = 0;
-	NVIC_STRELOAD_R = 16000 - 1; //Standard freq is 16000 cycles per second or 1kHz from 16 mHz 
+	NVIC_STRELOAD_R = 7500 - 1; //Standard freq is 120.000.000 / 16000 = 7500 cycles per second or 16kHz from 120 Mhz 
 	NVIC_STCURRENT_R = 0;
 	NVIC_STCTRL_R = 0x07;
 }
 
 void Read_Sensors_ADC (void)
 {
- 
- ADC0_PSSI = 0x04; //Activate SS2
+ ADCProcessorTrigger(ADC0_BASE, 2);
+	while(!ADCIntStatus(ADC0_BASE, 2, false));
+  ADCSequenceDataGet(ADC0_BASE, 2, distance);
+  ADCIntClear(ADC0_BASE, 2);
+	distance_right = 241814 / distance[0];
+	distance_left = 241814 / distance [1];
+	
+ /*ADC0_PSSI = 0x04; //Activate SS2
  while((ADC0_RIS&0x04)==0){}; //if not 0 (its one), it will proceed the looping
  right_sensor= ADC0_SSFIFO2 & 0xFFF;
  left_sensor = ADC0_SSFIFO2 & 0xFFF;
  distance_right = 241814 / right_sensor; //returning distance that is the result of result divided by empirical constant (241814)
  distance_left = 241814 / left_sensor; //returning distance that is the result of result divided by empirical constant (241814)
- ADC0_ISC = 0x04; //clear interrupt flag for SS2
+ ADC0_ISC = 0x04; //clear interrupt flag for SS2*/
 
 }
 
@@ -220,29 +246,30 @@ void Robot_Logic (void)
 	if ( Error > 0 ) 
 	{	
 		
-		standard_high_right = 9600; // 60% PWM right
-		standard_high_left = 4800; // 30% PWM left
-	}
-	else if ( Error == 0 ) //back to normal
-	{
-		standard_high_right = 7200; //45%
-		standard_high_left = 7200; //45%
+		standard_high_right = 4500; // 60% PWM right
+		standard_high_left = 3000; // 40% PWM left
 	}
 	
-	// Distance right (closer to object ) < distance left (further from object )
-	if ( Error < 0 )
+	else if ( Error < 0 )
 	{
-		standard_high_left = 9600; //60% PWM left
-		standard_high_right = 4800; //30% PWM right
-	}
-	else if ( Error == 0 )
-	{
-		standard_high_left = 7200; //45%
-		standard_high_right = 7200; //45%
+		standard_high_left = 4500; //60% PWM left
+		standard_high_right = 3000; //40% PWM right
 	}
 	
-	standard_low_left = 16000 - standard_high_left;
-	standard_low_right = 16000 - standard_high_right;
+	else //back to normal
+	{
+		if  (Error == 0 )
+		{
+			
+		standard_high_right = 3750 ; //50%
+		standard_high_left = 3750; //50%
+			
+		}
+	}
+	
+	
+	standard_low_left = 7500 - standard_high_left;
+	standard_low_right = 7500 - standard_high_right;
 	
 }
 
@@ -255,7 +282,7 @@ void SysTick_Handler (void) //here we are using SysTick to help collecting Data 
 	Robot_Logic();
 	
 	//For Controlling Independent PWM on each PA4 and PA5
-	counter_pwm = (counter_pwm + 1) % 16000; // If exceed 16000, will reset to 0 again
+	counter_pwm = (counter_pwm + 1) % 7500; // If exceed 7500, will reset to 0 again
 	
 	if( counter_pwm < standard_high_right ) //NVIC reload value is absolute, but we can manipulate as per variable to control on and off too so the PWM will be independent on each DC motor
 	{
@@ -282,6 +309,7 @@ void SysTick_Handler (void) //here we are using SysTick to help collecting Data 
 	
 int main (void)
 {
+	PLL_Init();
 	GPIOA_Init();
 	GPIOE_Init();
 	SysTick_Init();
