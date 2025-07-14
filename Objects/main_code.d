@@ -7,3 +7,4 @@
 .\objects\main_code.o: C:\ti\TivaWare_C_Series-2.2.0.295\driverlib/adc.h
 .\objects\main_code.o: C:\ti\TivaWare_C_Series-2.2.0.295\driverlib/systick.h
 .\objects\main_code.o: C:\ti\TivaWare_C_Series-2.2.0.295\driverlib/interrupt.h
+.\objects\main_code.o: C:\ti\TivaWare_C_Series-2.2.0.295\inc/hw_ints.h

@@ -57,7 +57,11 @@ Create a simple robot that can handle obstacle and keep moving forward. Using PW
 3. Robot Body and Attachment
 	- 2 wheels attached to the DC Motors 78MM Dual Shaft( choose with the good friction and low load for the motor to spin)
 	- 2 WD Casis kit
-	
+
+
+Changes of plan :
+- Im going to use TivaWare API on ADC because its always error on reading the ADC RIS register value with DRM method
+- 
 
 */
 
@@ -72,6 +76,7 @@ Create a simple robot that can handle obstacle and keep moving forward. Using PW
 #include "driverlib/adc.h"
 #include "driverlib/systick.h"
 #include "driverlib/interrupt.h"
+#include "inc/hw_ints.h"
 
 
 //*** ADDRESS ***//
@@ -122,30 +127,17 @@ Create a simple robot that can handle obstacle and keep moving forward. Using PW
 
 //*** PROTOTYPE ***//
 
-uint32_t Sensor_Result_ADC_Right(void);
-uint32_t Sensor_Result_ADC_Left(void);
-void GPIOA_Init(void);
-void GPIOE_Init (void);
 
 
 //*** GLOBAL VARIABLE ***///
 
-uint8_t flag;
-uint32_t data_right;
-uint32_t data_left;
-uint32_t right_sensor; //for PE2
-uint32_t left_sensor; // for PE3
-uint32_t distance[2];
-uint32_t distance_right;
-uint32_t distance_left;
-uint32_t standard_high_right = 7200; //if no problem, this is the standard PWM for high
-uint32_t standard_low_right = 8800; // if no problem, this is the standard PWM for low
+volatile uint32_t counter_pwm = 0;
+volatile uint32_t standard_high_left;
+volatile uint32_t standard_high_right;
+volatile uint32_t sensor_value[2];
 
-uint32_t standard_high_left = 7200; //if no problem, this is the standard PWM for high
-uint32_t standard_low_left = 8800; // if no problem, this is the standard PWM for low
-
-uint32_t counter_pwm = 0;
-
+volatile uint32_t distance_right;
+volatile uint32_t distance_left;
 
 
 
@@ -168,6 +160,7 @@ void PLL_Init(void)
 void GPIOA_Init (void)
 {
 	SYSCTL_RCGCGPIO_R |= 0x01;  //0000 0001 , turn on Port A clock
+	while ((SYSCTL_RCGCGPIO_R & 0x01) == 0);
 	GPIO_PORTA_DIR_R |= 0x30; //0011 0000, PA4 and PA5 as output
 	GPIO_PORTA_DEN_R |= 0x30; //0011 0000, PA4 and PA5 use digital funct
 	GPIO_PORTA_DR8R |= 0x30; //0011 0000, PA4 and PA5 has 8mA drive ( for dc motor amps)
@@ -176,25 +169,32 @@ void GPIOA_Init (void)
 
 void GPIOE_Init (void)
 {
-	SYSCTL_RCGCGPIO_R |= 0x10; //0001 000"1", turn on port E clock yet not disturbing previous setup on Port A
-	GPIO_PORTE_DEN_R &= ~0xFF; //0000 0000, make everything 0
-	GPIO_PORTE_DIR_R &= ~0x0C; //1111 0011, make PE3 and PE2 input
-	GPIO_PORTE_AFSEL_R |= 0x0C; // 0000 1100, PE3 and PE2 alternative funct on
+	SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOE); //0001 000"1", turn on port E clock yet not disturbing previous setup on Port A
+  while (!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOE));
+	GPIO_PORTE_DEN_R &= ~0x0C; // Disable digital PE2, PE3
+	GPIO_PORTE_AFSEL_R |= 0x0C; // 0000 1100, PE3 and PE2 alternative funct on ( no need to setup dir cause already analog mode )
 	GPIO_PORTE_AMSEL_R |= 0x0C; //0000 1100, PE3 and PE2 analog funct on
 	
 }
 
-void ADC0_Init_SoftwareTrigger (void)
+void ADC0_Sequencer2_Init_SoftwareTrigger (void)
 {
+	 SysCtlPeripheralEnable(SYSCTL_PERIPH_ADC0); //Turn on Sysctl for ADC0
+   while(!SysCtlPeripheralReady(SYSCTL_PERIPH_ADC0)); //Stabilize the clock first
+   ADCSequenceDisable(ADC0_BASE, 2); //Disable seq2
+   ADCSequenceConfigure(ADC0_BASE, 2, ADC_TRIGGER_PROCESSOR, 0);
+   
+   ADCSequenceStepConfigure(ADC0_BASE, 2, 0, ADC_CTL_CH1); // Step 0: AIN1 (PE2)
+   
+   ADCSequenceStepConfigure(ADC0_BASE, 2, 1, ADC_CTL_CH0 | ADC_CTL_IE | ADC_CTL_END); // Step 1: AIN0 (PE3) + IE + END
+
+   ADCSequenceEnable(ADC0_BASE, 2); //Enable Seq 2
+   ADCIntClear(ADC0_BASE, 2); // Clear
 	
-	ADCSequenceConfigure(ADC0_BASE, 2, ADC_TRIGGER_PROCESSOR, 0); //Sequencer 2 is used
-	ADCSequenceStepConfigure(ADC0_BASE, 2, 0, ADC_CTL_CH0); //Step 0 PE3 (AIN 0)
-	ADCSequenceStepConfigure(ADC0_BASE, 2, 1, ADC_CTL_CH1 | ADC_CTL_IE | ADC_CTL_END); //Step 1 PE2 (AIN 1)
-	ADCSequenceEnable(ADC0_BASE, 2);
-  ADCIntClear(ADC0_BASE, 2);
 	
 	
 	/*
+	DRM Method didn't work =
 	SYSCTL_RCGCADC_R |= 0x01; //0000 0001, turn on ADC0
 	while(!SysCtlPeripheralReady(SYSCTL_PERIPH_ADC0));
 	ADC0_PC &= ~0xF; //reset all bits to 0 for ADCPC reg
@@ -213,76 +213,74 @@ void ADC0_Init_SoftwareTrigger (void)
 void SysTick_Init (void)
 {
 	NVIC_STCTRL_R = 0;
-	NVIC_STRELOAD_R = 7500 - 1; //Standard freq is 120.000.000 / 16000 = 7500 cycles per second or 16kHz from 120 Mhz 
+	NVIC_STRELOAD_R = 12000 - 1; //Standard freq is 120.000.000, we need 10 kHz per PWM 100% or 100 micro seconds cause 1 tick is 8.33 nano seconds, so reload value is 12000 - 1
 	NVIC_STCURRENT_R = 0;
 	NVIC_STCTRL_R = 0x07;
+	NVIC_SYS_PRI3_R = (NVIC_SYS_PRI3_R & 0x00FFFFFF) | 0x20000000; //Priority 1
 }
 
-void Read_Sensors_ADC (void)
+
+
+
+
+
+void Robot_Logic (void)
 {
- ADCProcessorTrigger(ADC0_BASE, 2);
-	while(!ADCIntStatus(ADC0_BASE, 2, false));
-  ADCSequenceDataGet(ADC0_BASE, 2, distance);
-  ADCIntClear(ADC0_BASE, 2);
-	distance_right = 241814 / distance[0];
-	distance_left = 241814 / distance [1];
+
+	distance_right = 114251 / sensor_value[0]; 
+	distance_left = 114251 / sensor_value[1];
+  int32_t error = distance_right - distance_left;
 	
- /*ADC0_PSSI = 0x04; //Activate SS2
+		
+  if (error > 10) 
+	{
+    standard_high_right = 7200; // 60%
+    standard_high_left = 3000;  // 40%
+  }
+  else if (error < -10) 
+	{
+    standard_high_left = 7200; // 60%
+    standard_high_right = 3000; // 40%
+  }
+  else 
+	{
+    standard_high_left = 6000; // 50%
+    standard_high_right = 6000; // 50%
+  }
+
+	
+}
+
+void ADC_READ(void)
+{	 
+	 uint32_t adc_val[2];
+	 ADCProcessorTrigger(ADC0_BASE, 2); //Systick control the trigger for ADC data retrieve
+	 ADCIntClear(ADC0_BASE, 2);
+	 ADCSequenceDataGet(ADC0_BASE, 2, adc_val);
+	 sensor_value[0] = 241814 / adc_val[0];
+	 sensor_value[1] = 241814 / adc_val[1];
+	 Robot_Logic(); //Logic on how the robot move/takes decision
+
+	
+	
+	
+ /*
+ DRM didn't work = 
+ ADC0_PSSI = 0x04; //Activate SS2
  while((ADC0_RIS&0x04)==0){}; //if not 0 (its one), it will proceed the looping
  right_sensor= ADC0_SSFIFO2 & 0xFFF;
  left_sensor = ADC0_SSFIFO2 & 0xFFF;
  distance_right = 241814 / right_sensor; //returning distance that is the result of result divided by empirical constant (241814)
  distance_left = 241814 / left_sensor; //returning distance that is the result of result divided by empirical constant (241814)
- ADC0_ISC = 0x04; //clear interrupt flag for SS2*/
-
-}
-
-
-void Robot_Logic (void)
-{
-	int32_t Error = distance_right - distance_left; // Using int cause can be - or negative, if 0, move straight ( that's the plan ), this is in mm
-	
-	//Distance right (further from object) > distance left (closer to object ), turn right until error = 0
-	if ( Error > 0 ) 
-	{	
-		
-		standard_high_right = 4500; // 60% PWM right
-		standard_high_left = 3000; // 40% PWM left
-	}
-	
-	else if ( Error < 0 )
-	{
-		standard_high_left = 4500; //60% PWM left
-		standard_high_right = 3000; //40% PWM right
-	}
-	
-	else //back to normal
-	{
-		if  (Error == 0 )
-		{
-			
-		standard_high_right = 3750 ; //50%
-		standard_high_left = 3750; //50%
-			
-		}
-	}
-	
-	
-	standard_low_left = 7500 - standard_high_left;
-	standard_low_right = 7500 - standard_high_right;
-	
+ ADC0_ISC = 0x04; //clear interrupt flag for SS2
+*/
 }
 
 void SysTick_Handler (void) //here we are using SysTick to help collecting Data and control the PWM of the DC Motor
 {
-	//Reading sensors
-	Read_Sensors_ADC();
-	
-	//Logic on how the robot move/takes decision
-	Robot_Logic();
 	
 	//For Controlling Independent PWM on each PA4 and PA5
-	counter_pwm = (counter_pwm + 1) % 7500; // If exceed 7500, will reset to 0 again
+	counter_pwm = (counter_pwm + 1) % 12000; // If exceed 12000, will reset to 0 again
 	
 	if( counter_pwm < standard_high_right ) //NVIC reload value is absolute, but we can manipulate as per variable to control on and off too so the PWM will be independent on each DC motor
 	{
@@ -303,7 +301,6 @@ void SysTick_Handler (void) //here we are using SysTick to help collecting Data 
 		GPIO_PORTA_DATA_R &= ~0x20; //Will be LOW on how much the subtraction of high and 16000 ( standard systick freq )
 	}
 	
-	
 }
 
 	
@@ -313,11 +310,11 @@ int main (void)
 	GPIOA_Init();
 	GPIOE_Init();
 	SysTick_Init();
-	ADC0_Init_SoftwareTrigger();
+	ADC0_Sequencer2_Init_SoftwareTrigger();
 	EnableInterrupts();
 	while(1)
-	{
-		
+	{	
+		ADC_READ();
 		WaitForInterrupts();
 	}
 }
