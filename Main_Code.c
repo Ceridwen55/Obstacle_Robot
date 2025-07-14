@@ -15,13 +15,13 @@ Create a simple robot that can handle obstacle and keep moving forward. Using PW
 
 3. Set the PWM function using Systick to automate and control the DC motors PWM
  - Using Systick to control the PWM at right and left DC motors
- - Minimum PWM is 30% on each DC Motor ( High 30%, Low 70%), and Maximum PWM is 60% on each the DC motor, standard is 45%
+ - Minimum PWM is 30% on each DC Motor ( High 30%, Low 70%), and Maximum PWM is 60% on each the DC motor, standard is 50%
  - We set the NVIC Reload value for the H+L is 16000, because we need 16000 cycle per second or 16 KHz to make the rotation smoother ( PLL base freq change to 120 Mhz to accomodate ADC conversion, 120.000.000 cycles per second)
  - We will get the analog value from the distance sensor and convert it to digital value in another function, based on that statement, we will control the PWM if it should turn right or left or stay
  - We will use this main formula to determine the 'turn', Error = DistanceLeft - DistanceRight
 
 4. Create the 2 ADC Function to convert the analog value to digital value so we can use that to determine the robot's judgment
- - Based on the empirical calibration, we found that contant number for ADC value to Real distance is 241814, so the formula is Distance = 241814 / ADC value from sensor
+ - Based on the empirical calibration, we found that contant number for ADC value to Real distance is 114251, so the formula is Distance = 114251 / ADC value from sensor
  - Because we are using TM4C1294XL, we use 12 bit ADC so the ADC value range will be from 0 to 4095 ( cause of 12 bit, therefore 4096 possibilities can happen)
  - After conversion, we will return the Distance value so it can be used to control each the DC motor PWM
 
@@ -221,9 +221,6 @@ void SysTick_Init (void)
 
 
 
-
-
-
 void Robot_Logic (void)
 {
 
@@ -234,13 +231,13 @@ void Robot_Logic (void)
 		
   if (error > 10) 
 	{
-    standard_high_right = 7200; // 60%
-    standard_high_left = 3000;  // 40%
+    standard_high_right = 8200; // 60%
+    standard_high_left = 3800;  // 40%
   }
   else if (error < -10) 
 	{
-    standard_high_left = 7200; // 60%
-    standard_high_right = 3000; // 40%
+    standard_high_left = 8200; // 60%
+    standard_high_right = 3800; // 40%
   }
   else 
 	{
@@ -253,13 +250,14 @@ void Robot_Logic (void)
 
 void ADC_READ(void)
 {	 
-	 uint32_t adc_val[2];
-	 ADCProcessorTrigger(ADC0_BASE, 2); //Systick control the trigger for ADC data retrieve
-	 ADCIntClear(ADC0_BASE, 2);
-	 ADCSequenceDataGet(ADC0_BASE, 2, adc_val);
-	 sensor_value[0] = 241814 / adc_val[0];
-	 sensor_value[1] = 241814 / adc_val[1];
-	 Robot_Logic(); //Logic on how the robot move/takes decision
+	 uint32_t adc_vals[2];
+	
+   ADCProcessorTrigger(ADC0_BASE, 2);
+   while (!ADCIntStatus(ADC0_BASE, 2, false));
+   ADCSequenceDataGet(ADC0_BASE, 2, adc_vals);
+   ADCIntClear(ADC0_BASE, 2);
+	 sensor_value[0] = adc_vals[0]; // PE2 converted distance
+   sensor_value[1] = adc_vals[1]; // PE3 converted distance
 
 	
 	
@@ -279,27 +277,18 @@ void ADC_READ(void)
 void SysTick_Handler (void) //here we are using SysTick to help collecting Data and control the PWM of the DC Motor
 {
 	
-	//For Controlling Independent PWM on each PA4 and PA5
-	counter_pwm = (counter_pwm + 1) % 12000; // If exceed 12000, will reset to 0 again
+	counter_pwm = (counter_pwm + 1) % 12000;
 	
-	if( counter_pwm < standard_high_right ) //NVIC reload value is absolute, but we can manipulate as per variable to control on and off too so the PWM will be independent on each DC motor
-	{
-		GPIO_PORTA_DATA_R |= 0x10; //Will be HIGH on how much the robot logic decision
-	}
-	else
-	{
-		GPIO_PORTA_DATA_R &= ~0x10;//Will be LOW on how much the subtraction of high and 16000 ( standard systick freq )
-	}
-	
-	if (counter_pwm < standard_high_left )
-	{
-		GPIO_PORTA_DATA_R |= 0x20; //Will be HIGH on how much the robot logic decision
-	}
-	
-	else
-	{
-		GPIO_PORTA_DATA_R &= ~0x20; //Will be LOW on how much the subtraction of high and 16000 ( standard systick freq )
-	}
+		
+  if(counter_pwm < standard_high_right)
+      GPIO_PORTA_DATA_R |= 0x10;
+  else
+      GPIO_PORTA_DATA_R &= ~0x10;
+
+  if(counter_pwm < standard_high_left)
+      GPIO_PORTA_DATA_R |= 0x20;
+  else
+      GPIO_PORTA_DATA_R &= ~0x20;
 	
 }
 
@@ -315,6 +304,6 @@ int main (void)
 	while(1)
 	{	
 		ADC_READ();
-		WaitForInterrupts();
+		Robot_Logic();
 	}
 }
