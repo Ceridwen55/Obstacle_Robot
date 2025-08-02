@@ -1,4 +1,4 @@
-24429295140009639
+24431063404596688
 Audio_Module
 Reverb_BTDR-1H
 Digital Reverberation Unit, http://www.belton.co.kr/inc/downfile.php?seq=17&file=pdf (footprint from http://www.uk-electronic.de/PDF/BTDR-1.pdf)
@@ -35207,8 +35207,8 @@ PinHeader_2x10_P2.54mm_Vertical
 Through hole straight pin header, 2x10, 2.54mm pitch, double rows
 Through hole pin header THT 2x10 2.54mm double row
 0
-20
-20
+6
+6
 Connector_PinHeader_2.54mm
 PinHeader_2x10_P2.54mm_Vertical_SMD
 surface-mounted straight pin header, 2x10, 2.54mm pitch, double rows
@@ -35846,6 +35846,13 @@ Surface mounted pin header SMD 2x40 2.54mm double row
 0
 80
 80
+Connector_PinHeader_2.54mm
+Untitled
+
+
+0
+0
+0
 Connector_PinSocket_1.00mm
 PinSocket_1x02_P1.00mm_Vertical
 Through hole straight socket strip, 1x02, 1.00mm pitch, single row (https://gct.co/files/drawings/bc065.pdf), script generated
