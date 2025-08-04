@@ -1,6 +1,6 @@
 ## 🤖 Wall Avoiding Robot (TM4C1294XL + PWM + Sharp IR Sensor)
 
-A lightweight wall-avoiding robot built with the TM4C1294XL LaunchPad, using real analog sensor data and low-level embedded programming. No RTOS, no Arduino—just C, timers, ADCs, and PWM. Great for learning direct hardware control.
+A lightweight wall-avoiding robot built with the TM4C1294XL LaunchPad, using real analog sensor data and low-level embedded programming. No RTOS ( I dont think I need to implement this due to simple scheduling situation ), no Arduino. Just C, timers, ADCs, and PWM. Great for learning direct hardware control. I'm mixing DRM and TivaWare due to ADC RIS didn't work with my intention with using DRM only method, so that's that
 
 ---
 
@@ -26,7 +26,6 @@ It uses:
    PE2 and PE3 (AIN1 and AIN0) are used for right and left distance sensors. ADC sequencer 2 reads both at once.
 
 3. **Distance calculation:**  
-   ```c
    Distance (cm) = 114251 / ADC_Value
 (Empirically derived constant for GP2Y0A21YK0F)
 
@@ -38,6 +37,7 @@ If the robot is too close on one side → slow that side's motor
 If both sides are balanced → move forward
 
 ## 🧠 Behavior Table
+
 Condition	Action
 error > 100	Turn left (slow right motor)
 error < -100	Turn right (slow left motor)
