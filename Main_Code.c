@@ -229,15 +229,15 @@ void Robot_Logic (void)
   int32_t error = distance_right - distance_left;
 	
 		
-  if (error > 10) 
+  if (error > 100) 
 	{
     standard_high_right = 8200; // 60%
     standard_high_left = 3800;  // 40%
   }
-  else if (error < -10) 
+  else if (error < -100) 
 	{
     standard_high_left = 8200; // 60%
-    standard_high_right = 3800; // 40%
+    standard_high_right = 38300; // 40%
   }
   else 
 	{
