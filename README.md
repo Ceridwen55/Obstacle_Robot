@@ -30,7 +30,9 @@ It uses:
 (Empirically derived constant for GP2Y0A21YK0F)
 
 ## Decision-making:
-The difference between left and right distance determines motor speed difference. Logic:
+The difference between left and right distance determines motor speed difference. 
+
+Logic:
 
 If the robot is too close on one side → slow that side's motor
 
@@ -50,7 +52,7 @@ error < -100	Turn right (slow left motor)
 | TM4C1294XL LaunchPad             | 1        | Main MCU board                             |
 | DC Motors (3–7V, F130 type)      | 2        | For driving the wheels                     |
 | Sharp IR Sensor (GP2Y0A21YK0F)   | 2        | Distance sensing front-left and front-right|
-| IRLB3034 / TIP120 Transistors    | 2        | Motor driver (TIP120 used due to logic voltage compatibility) |
+| IRLB3034 / TIP120 Transistors    | 2        | Motor driver (TIP120 used due to logic voltage compatibility) | ( *Yup this is too far right lol* )
 | Diode 1N4002                     | 2        | Flyback protection                         |
 | Capacitor 10µF                   | 2        | Noise filtering                            |
 | L7805CV Voltage Regulator        | 1        | For 5V output to sensors & MCU             |
@@ -104,15 +106,18 @@ Read analog voltages, convert to digital values, apply distance formula
 - [ ] Add LED indicators or debug UART for status reporting
 - [ ] Add hysteresis for smoother turning
 - [ ] Add PID-style control instead of simple threshold error
+- [ ] VACUUMM CLEANERRRR
+- [ ] Voice Assistant so at least I've got someone to talk when my Wife's working hehe ( I'm  going to make this cute robot on the next project using ESP32 instead so stay tuneee (I know this is hard but, LETS GOOO :))) )
 
 ---
 
 ## 🧪 Requirements
 
 - TivaWare SDK
-- ARM GCC or Code Composer Studio
-- Soldering gear (if using PCB)
-- Oscilloscope / logic analyzer (optional but useful, but I dont have one *cry*)
+- ARM GCC or Code Composer Studio ( I'm using Keil uVision here )
+- Due to DRM Method, it's exclusive on TM4C1294XL from Texas Instrument
+- Soldering gear (if using PCB )
+- Oscilloscope / logic analyzer (optional but useful, but I dont have one avail right now *cry*)
 
 ---
 
@@ -126,7 +131,7 @@ Read analog voltages, convert to digital values, apply distance formula
 
 ## 💡 Inspiration
 
-A mix of old-school analog robotics and low-level microcontroller programming. It’s a nice weekend project to brush up on embedded C, register-level config, and real-time logic.
+A mix of old-school analog robotics and low-level microcontroller programming ( honestly, it's Wall-E, really ). It’s a nice weekend project to brush up on embedded C, register-level config, and real-time logic. By the way, this is one of the first complex project that I'm just working on for my porto.
 
 ---
 
@@ -136,4 +141,4 @@ MIT License — free to use, modify, and share. If you build your own version or
 
 ---
 
-Thanks for checking out my simple project!
+Thanks for checking out my simple project! Stay tune for my next project.
